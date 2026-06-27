@@ -1,0 +1,30 @@
+# 编译输出（绝对不能提交）
+**/target/
+**/*.class
+
+# IDE配置
+**/.idea/
+**/*.iml
+**/.vscode/
+**/.settings/
+**/.project
+**/.classpath
+
+# 日志文件
+**/*.log
+
+# 本地环境配置（含数据库密码）
+**/application-local.yml
+**/application-dev.yml
+**/application-test.yml
+**/bootstrap-local.yml
+
+# Maven 包装器（可选，建议保留但已提交也没事）
+# .mvn/ 建议忽略，但如果你团队统一版本可以留着，这里我不强制
+**/.mvn/
+**/mvnw
+**/mvnw.cmd
+
+# 操作系统垃圾文件
+**/.DS_Store
+**/Thumbs.db

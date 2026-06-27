@@ -1,0 +1,176 @@
+spring:
+  application:
+    name: mes-dome
+  profiles:
+    active: local
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mes_db
+    username: root
+    password: Fzy20041126
+    hikari:
+      pool-name: MesHikariPool
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  data:
+    redis:
+      database: ${REDIS_DATABASE:0}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+      connect-timeout: 3000ms
+
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+    datatype:
+      datetime:
+        write-dates-as-timestamps: false
+
+  aop:
+    auto: true
+    proxy-target-class: true
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.fzy.mes.**.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: auto
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when_authorized
+  health:
+    redis:
+      enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.fzy.mes: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    com.baomidou.mybatisplus: DEBUG
+    org.redisson: INFO
+    org.apache.rocketmq: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/mes-dome.log
+
+mes:
+  jwt:
+    secret: ${JWT_SECRET:mes-dome-change-me-in-production-use-long-random-string}
+    issuer: mes-dome
+    access-token-expire-seconds: ${JWT_EXPIRE_SECONDS:86400}
+    header: Authorization
+    prefix: "Bearer "
+
+  security:
+    permit-urls:
+      - /api/auth/login
+      - /api/auth/register
+      - /actuator/health
+      - /actuator/info
+
+  rocketmq:
+    name-server: ${ROCKETMQ_NAMESERVER:127.0.0.1:9876}
+    producer:
+      group: mes-producer-group
+      send-message-timeout: 3000
+      retry-times-when-send-failed: 2
+      max-message-size: 4194304
+    consumer:
+      group: mes-consumer-group
+      consume-thread-min: 5
+      consume-thread-max: 20
+    topic:
+      report-submit: mes_report_submit
+      erp-callback: mes_erp_callback
+    tag:
+      report-submit: submit
+      erp-callback: callback
+
+  redis:
+    key-prefix: mes
+    idempotent:
+      erp-order-ttl-days: 7
+      report-request-ttl-hours: 24
+    lock:
+      task-report-ttl-seconds: 30
+    cache:
+      work-order-stats-ttl-seconds: 60
+
+---
+# 本地开发（默认）：不强制连接 Redis，先跑通 Web + MySQL
+spring:
+  config:
+    activate:
+      on-profile: local
+  autoconfigure:
+    exclude:
+      - org.redisson.spring.starter.RedissonAutoConfigurationV4
+
+logging:
+  level:
+    com.fzy.mes: DEBUG
+
+---
+# 完整中间件：需先启动 Redis（docker-compose up redis）
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+management:
+  health:
+    redis:
+      enabled: true
+
+logging:
+  level:
+    com.fzy.mes: DEBUG
+    org.springframework.security: DEBUG
+
+mes:
+  jwt:
+    access-token-expire-seconds: 604800
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    com.fzy.mes: INFO
+    com.baomidou.mybatisplus: WARN
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
