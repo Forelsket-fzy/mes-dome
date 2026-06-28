@@ -52,14 +52,13 @@
 			<artifactId>mysql-connector-j</artifactId>
 		</dependency>
 
-		<!-- lombok -->
-		<!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<!-- lombok：compile 阶段生成 getter/setter/toString，运行时不需要 -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.42</version>
-			<scope>compile</scope>
+			<optional>true</optional>
 		</dependency>
+
 
 		<!-- redis -->
 		<dependency>
@@ -125,10 +124,23 @@
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
