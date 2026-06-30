@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,11 +49,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
             //从缓存中获取权限
-            List<GrantedAuthority> authorityList = null;
+            List<GrantedAuthority> authorityList = Collections.emptyList();
 
             //从缓存中获取信息
-            Long id = null;
-            Boolean enabled = null;
+            Long id = 1L;
+            Boolean enabled = true;
 
             //构建UserDetails对象 （不需要密码）
             UserDetails userDetails = new LoginUser(id,username,"",enabled,authorityList);

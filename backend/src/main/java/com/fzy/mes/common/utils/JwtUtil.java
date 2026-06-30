@@ -12,7 +12,7 @@ import java.util.Map;
 public class JwtUtil {
 
 
-    private static final String secret = "fangzhengyuan";
+    private static final String secret = "mes-dome";
 
     /*
      * 生成Token
@@ -30,9 +30,9 @@ public class JwtUtil {
                 .withHeader(header)
                 //设置jwt的payload数据
                 .withClaim("claims", claimsMap)
-                .withIssuer("fangzhengyuan")//设置签发者
-                .withSubject("kindergarten")//设置主题
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 5))//设置过期时间
+                .withIssuer("mes")//设置签发者
+                .withSubject("mes")//设置主题
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))//设置过期时间
                 .withIssuedAt(new Date())//设置签发时间
                 .sign(Algorithm.HMAC256(secret));
     }

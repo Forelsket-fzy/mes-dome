@@ -1,4 +1,4 @@
-package com.fzy.mes.config;
+package com.fzy.mes.common.config;
 
 import com.fzy.mes.common.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;

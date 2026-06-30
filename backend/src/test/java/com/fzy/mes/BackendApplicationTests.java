@@ -29,4 +29,10 @@ class BackendApplicationTests {
 
 
 
+	@Test
+	public void tets(){
+		System.out.println("test");
+	}
+
+
 }
