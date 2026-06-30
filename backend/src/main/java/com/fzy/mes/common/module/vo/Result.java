@@ -27,6 +27,10 @@ public class Result<T> {
         return new Result<>(400, message, null);
     }
 
+    public static <T> Result<T> unauthorized(String message) {
+        return new Result<>(401, message, null);
+    }
+
 
 
 }

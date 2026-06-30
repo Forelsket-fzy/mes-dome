@@ -79,20 +79,6 @@ logging:
     name: logs/mes-dome.log
 
 mes:
-  jwt:
-    secret: mes-dome-dev-secret-change-in-production
-    issuer: mes-dome
-    access-token-expire-seconds: 604800
-    header: Authorization
-    prefix: "Bearer "
-
-  security:
-    permit-urls:
-      - /api/auth/login
-      - /api/auth/register
-      - /actuator/health
-      - /actuator/info
-
   rocketmq:
     name-server: 127.0.0.1:9876
     producer:
@@ -137,6 +123,4 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
-mes:
-  jwt:
-    secret: replace-with-long-random-secret-in-production
+
