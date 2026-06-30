@@ -21,7 +21,6 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     public Result<Map<String,String>> login(@RequestBody @Valid LoginRequest req) {
-        System.out.println(req.toString());
         return Result.success(authService.login(req));
     }
 

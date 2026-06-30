@@ -1,6 +1,8 @@
 package com.fzy.mes.common.config;
 
 import com.fzy.mes.common.filter.JwtAuthenticationFilter;
+import com.fzy.mes.module.auth.service.AuthService;
+import com.fzy.mes.module.cache.service.CacheService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,10 +30,9 @@ public class SecurityConfig {
 
 	//jwt过滤器
 	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter() {
-		return new JwtAuthenticationFilter();
+	public JwtAuthenticationFilter jwtAuthenticationFilter(AuthService authService) {
+		return new JwtAuthenticationFilter(authService);
 	}
-
 
 	//认证管理器
 	@Bean
@@ -40,7 +41,7 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http,AuthService authService) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
@@ -49,7 +50,7 @@ public class SecurityConfig {
 						.anyRequest().authenticated());
 
 
-		http.addFilterBefore(jwtAuthenticationFilter() , UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(jwtAuthenticationFilter(authService), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

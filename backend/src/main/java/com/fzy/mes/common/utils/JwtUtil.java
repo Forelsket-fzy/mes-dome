@@ -4,11 +4,13 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.jwt.interfaces.Verification;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class JwtUtil {
 
 
@@ -60,7 +62,7 @@ public class JwtUtil {
             build.verify(token);
             return true;
         }catch (Exception e){
-            e.printStackTrace();
+            log.warn(e.getMessage());
         }
         return false;
     }

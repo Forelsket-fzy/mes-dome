@@ -1,11 +1,17 @@
 package com.fzy.mes.module.auth.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fzy.mes.module.auth.dto.AuthSession;
+import com.fzy.mes.module.auth.entity.SysUser;
 import com.fzy.mes.module.auth.entity.UserAuth;
 import com.fzy.mes.module.auth.mapper.UserAuthMapper;
+import com.fzy.mes.module.auth.service.AuthService;
 import com.fzy.mes.module.auth.vo.LoginUser;
+import com.fzy.mes.module.cache.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,26 +24,21 @@ public class UserDetailsServiceImpl  implements UserDetailsService {
     @Autowired
     private UserAuthMapper userAuthMapper;
 
+    @Autowired
+    private AuthService authService;
 
     @Override
     public LoginUser loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        //查询用户
-        UserAuth user = userAuthMapper.selectOne(Wrappers.<UserAuth>lambdaQuery().eq(UserAuth::getUsername,username));
+        //用户存在 从缓存中拿数据 不存在会直接抛异常
+        AuthSession user = authService.getByUsername(username);
 
-        if(user == null){
-            throw new UsernameNotFoundException("用户不存在");
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
         }
 
-        //将用户信息放入缓存中
+        List<GrantedAuthority> authorityList = List.of(new SimpleGrantedAuthority(user.getRole()));
 
-        //将用户信息权限放入缓存中
-
-        //返回用户权限信息
-        List<GrantedAuthority> authorityList = null;
-
-        boolean enabled = Integer.valueOf(1).equals(user.getEnabled());
-
-        return new LoginUser(user.getUserId(), username, user.getPassword(), enabled, authorityList);
+        return new LoginUser(user.getId(), username, user.getPassword(), user.getEnabled(), authorityList);
     }
 }
