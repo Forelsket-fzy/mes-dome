@@ -1,17 +1,15 @@
 package com.fzy.mes.module.auth.service;
 
-import com.fzy.mes.module.auth.dto.AuthSession;
 import com.fzy.mes.module.auth.dto.LoginRequest;
-import com.fzy.mes.module.auth.entity.SysUser;
 
 import java.util.Map;
 
 public interface AuthService {
-    Map<String,String> login(LoginRequest  req);
 
-    AuthSession loadFromDb(String username);
+    Map<String, String> login(LoginRequest req);
 
-    AuthSession getByUsername(String username);
+    Map<String, String> refresh(String refreshToken);
 
-    SysUser findUserByUserID(Long userID);
+    boolean logout(String refreshToken, String accessToken);
+
 }

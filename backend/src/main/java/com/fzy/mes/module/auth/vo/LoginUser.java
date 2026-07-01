@@ -1,14 +1,14 @@
 package com.fzy.mes.module.auth.vo;
 
-
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-
-@Data
+@Getter
+@AllArgsConstructor
 public class LoginUser implements UserDetails {
 
     private final Long id;
@@ -34,7 +34,7 @@ public class LoginUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return Boolean.TRUE.equals(enabled);
     }
 
 }
