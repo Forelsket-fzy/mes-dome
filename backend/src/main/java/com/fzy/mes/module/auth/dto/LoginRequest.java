@@ -9,7 +9,7 @@ public class LoginRequest {
 
     @NotEmpty(message = "用户名不能为空")
     private String username;
-    @NotEmpty
+    @NotEmpty(message = "密码不能为空")
     private String password;
 
 }

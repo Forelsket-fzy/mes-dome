@@ -6,7 +6,9 @@ import com.fzy.mes.module.auth.config.AccessTokenBlacklist;
 import com.fzy.mes.module.auth.config.RefreshTokenStore;
 import com.fzy.mes.module.auth.dto.LoginRequest;
 import com.fzy.mes.module.auth.service.AuthService;
+import com.fzy.mes.module.auth.service.AuthSessionService;
 import com.fzy.mes.module.auth.vo.LoginUser;
+import com.fzy.mes.module.cache.service.CacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +32,8 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RefreshTokenStore refreshTokenStore;
     @Autowired
+    private AuthSessionService authSessionService;
+    @Autowired
     private AccessTokenBlacklist accessTokenBlacklist;
     @Autowired
     private JwtUtil jwtUtil;
@@ -46,6 +50,9 @@ public class AuthServiceImpl implements AuthService {
         JwtAccessToken access = jwtUtil.generateAccessToken(loginUser.getUsername());
         String refreshToken = jwtUtil.generateRefreshToken();
         refreshTokenStore.save(refreshToken, loginUser.getUsername(), refreshExpireMs);
+
+        //签发token是将现token存入缓存
+        authSessionService.getByUsername(loginUser.getUsername());
 
         return Map.of(
                 "accessToken", access.token(),

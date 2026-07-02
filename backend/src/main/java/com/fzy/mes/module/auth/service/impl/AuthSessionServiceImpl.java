@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Service
 public class AuthSessionServiceImpl implements AuthSessionService {
@@ -46,7 +48,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         user.setSkillLevel(sysUser.getSkillLevel());
 
         try {
-            cacheService.setValue("mes:user:" + username, user);
+            cacheService.setValueWithExpire("mes:user:" + username, user, 3, TimeUnit.HOURS);
         } catch (RuntimeException e) {
             log.error("写入 Redis 失败, username={}", username, e);
         }

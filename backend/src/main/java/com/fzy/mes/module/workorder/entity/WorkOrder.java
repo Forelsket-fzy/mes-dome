@@ -19,9 +19,6 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @TableName("work_order")
 public class WorkOrder {
 

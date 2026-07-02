@@ -18,6 +18,7 @@ public class GlobalExceptionHandler {
         return Result.badRequest(msg != null && !msg.isBlank() ? msg : "参数校验失败");
     }
 
+
     @ExceptionHandler(BadCredentialsException.class)
     public Result<String> handleBadCredentials(BadCredentialsException e) {
         return Result.unauthorized("用户名或密码错误");
@@ -43,6 +44,11 @@ public class GlobalExceptionHandler {
             return Result.unauthorized("账号已禁用");
         }
         return Result.unauthorized("认证失败");
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public Result<String> handleBusiness(BusinessException e) {
+        return Result.badRequest(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
