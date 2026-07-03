@@ -1,5 +1,6 @@
 package com.fzy.mes.common.filter;
 
+import ch.qos.logback.core.encoder.EchoEncoder;
 import com.fzy.mes.common.utils.JwtAccessClaims;
 import com.fzy.mes.common.utils.JwtUtil;
 import com.fzy.mes.module.auth.config.AccessTokenBlacklist;
@@ -11,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -73,6 +75,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         List<GrantedAuthority> authorityList = (role == null || role.isBlank())
                 ? Collections.emptyList()
                 : List.of(new SimpleGrantedAuthority(role));
+
+        if (!Boolean.TRUE.equals(authSession.getEnabled())) {
+            response.sendError(401, "账号已禁用");
+            return;
+        }
 
         UserDetails userDetails = new LoginUser(
                 authSession.getId(),
