@@ -1,8 +1,8 @@
 package com.fzy.mes.common.filter;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
 import com.fzy.mes.common.utils.JwtAccessClaims;
 import com.fzy.mes.common.utils.JwtUtil;
+import com.fzy.mes.common.utils.ResultResponseWriter;
 import com.fzy.mes.module.auth.config.AccessTokenBlacklist;
 import com.fzy.mes.module.auth.dto.AuthSession;
 import com.fzy.mes.module.auth.service.AuthSessionService;
@@ -12,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,25 +48,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = JwtUtil.resolveBearerToken(request.getHeader("Authorization"));
         if (token == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "token不能为空");
+            ResultResponseWriter.writeUnauthorized(response, "token不能为空");
             return;
         }
 
         Optional<JwtAccessClaims> claimsOpt = jwtUtil.verifyAccessToken(token);
         if (claimsOpt.isEmpty()) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "token无效或已过期");
+            ResultResponseWriter.writeUnauthorized(response, "token无效或已过期");
             return;
         }
 
         JwtAccessClaims claims = claimsOpt.get();
         if (accessTokenBlacklist.isBlacklisted(claims.jti())) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "token已失效");
+            ResultResponseWriter.writeUnauthorized(response, "token已失效");
             return;
         }
 
         AuthSession authSession = authSessionService.getByUsername(claims.username());
         if (authSession == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "用户不存在");
+            ResultResponseWriter.writeUnauthorized(response, "用户不存在");
+            return;
+        }
+
+        if (!Boolean.TRUE.equals(authSession.getEnabled())) {
+            ResultResponseWriter.writeUnauthorized(response, "账号已禁用");
             return;
         }
 
@@ -75,11 +79,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         List<GrantedAuthority> authorityList = (role == null || role.isBlank())
                 ? Collections.emptyList()
                 : List.of(new SimpleGrantedAuthority(role));
-
-        if (!Boolean.TRUE.equals(authSession.getEnabled())) {
-            response.sendError(401, "账号已禁用");
-            return;
-        }
 
         UserDetails userDetails = new LoginUser(
                 authSession.getId(),

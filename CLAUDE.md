@@ -48,20 +48,22 @@ ERP Mock 推单 → 工单状态机 → 主动派工 → 扫码报工（MQ 异�
 | 项 | 状态 |
 |----|------|
 | Spring Boot 工程 + pom | ✅ |
-| `application.yml`（直连 MySQL/Redis，无 local profile） | ✅ |
+| `application.yml`（MySQL/Redis + `mes.jwt` / `mes.redis` / `mes.rocketmq`） | ✅ |
 | `mes_db.sql`（表结构 + 种子数据） | ✅ |
-| `SecurityConfig` + JWT 过滤器链 | 🟡 `common/config/SecurityConfig.java`，白名单硬编码 |
+| `SecurityConfig` + JWT 过滤器链 | ✅ 双令牌；`AuthSessionService`；access jti 黑名单 |
 | `docker-compose.yml`（MySQL + Redis） | ✅ |
 | Entity / Mapper（13 实体 + 14 Mapper） | ✅ |
-| 实体 Jakarta Validation（`Create`/`Update` 分组） | ✅ D2 遗留；**新 API 校验放 DTO**（见 §11.4） |
-| `Result<T>` + `GlobalExceptionHandler` | 🟡 含登录校验/认证异常 |
-| JWT 登录（`POST /api/auth/login`） | 🟡 Filter + `AuthService` 已通；RBAC/Redis 缓存/双令牌待做 |
-| CORS 配置 | ❌ |
-| Redis / RocketMQ 配置骨架 | ❌ |
-| Vue 前端 | ❌ |
-| RocketMQ Producer/Consumer | ❌ |
+| 实体 Jakarta Validation（`Create`/`Update` 分组） | ✅；**新 API 校验放 DTO** |
+| `Result<T>` + `GlobalExceptionHandler` | ✅ Controller + Filter 均返回 Result JSON |
+| JWT 登录 | ✅ |
+| Mock ERP 推单 | 🟡 D6 |
+| 工单查询 | 🟡 D8 分页 + 详情 |
+| CORS | 🟡 基础已有，origin 待收紧 |
+| Redis | ✅ |
+| RocketMQ | ⏸ 仅 yml 占位；Java 配置 **D22 再加** |
+| Vue 前端 | ❌ D7 |
 
-**当前开发阶段**：D3 收尾（CORS）+ D4 中间件 + D5 JWT 收尾（RBAC、Redis 会话、可选双令牌）并行推进。
+**当前开发阶段**：D5/D6/D8 代码完成；Filter 已统一 Result；下一步 Apifox → D7 前端 → D9 状态机。
 
 ---
 
@@ -78,7 +80,7 @@ MES-dome/
 │   └── src/main/
 │       ├── java/com/fzy/mes/
 │       │   ├── common/          # Result、SecurityConfig、JWT Filter、异常
-│       │   └── module/          # auth/workorder/dispatch/report/integration/quality
+│       │   └── module/          # auth / erp / workorder / dispatch / report / integration / quality
 │       └── resources/
 │           ├── application.yml
 │           └── sql/mes_db.sql
@@ -186,14 +188,14 @@ POST   /api/auth/login
 GET    /api/auth/me
 
 # ERP Mock
-POST   /api/erp/work-orders
-POST   /api/erp/work-orders/{no}/close
-GET    /api/erp/callback-logs
+POST   /api/erp/work-orders          # ✅ 已实现（需 JWT；幂等 + 写工序）
+POST   /api/erp/work-orders/{no}/close   # ❌ D10
+GET    /api/erp/callback-logs            # ❌ D26+
 
 # 工单
-GET    /api/work-orders
-GET    /api/work-orders/{id}
-GET    /api/work-orders/stats
+GET    /api/work-orders              # ✅ D8
+GET    /api/work-orders/{id}         # ✅ D8
+GET    /api/work-orders/stats        # D11
 
 # 派工
 POST   /api/dispatch
@@ -339,9 +341,10 @@ cd backend && mvn spring-boot:run
 
 ## 14. 下一步（开发者手写导向）
 
-1. **D3 剩余**：CORS 配置（`WebMvcConfigurer`，允许 `localhost:5173`）
-2. **D4**：RedisTemplate / Redisson 配置类 → 连通性自测；为 LoginUser 缓存与双令牌会话打基础
-3. **D5 收尾**：RBAC 查 role、Redis 缓存、`Bearer` 前缀、Filter 错误响应统一为 `Result`；可选双令牌（见 [优化计划.md](./优化计划.md) §2.5）
-4. **D6+**：ERP Mock → 状态机 → 派工 → 报工 MQ（均按 §11.1 手写，AI Review）
+1. **D6/D8 Apifox 自测**（推单幂等 + 工单分页/详情）
+2. **D7** Vue 壳子 + 登录页
+3. **D9** 工单状态机（手写）
+4. **D22 前再加 RocketMQ Java 配置**（当前仅 yml 占位，避免未连 MQ 启动失败）
+5. 余量见 [优化计划.md](./优化计划.md)：RBAC、CORS origin、`mes:user:` TTL
 
 每完成一个模块，用「帮我 Review + 面试怎么讲」的方式验收，而不是让 AI 生成下一块代码。

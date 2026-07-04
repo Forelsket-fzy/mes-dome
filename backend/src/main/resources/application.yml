@@ -84,7 +84,7 @@ mes:
     access-expire: 900000   # 15分钟
     refresh-expire: 604800000  # 7天
 
-
+  # RocketMQ：仅预留 Topic/Group 命名，D22 报工前不写 Java 配置类（未连 NameServer 时避免启动失败）
   rocketmq:
     name-server: 127.0.0.1:9876
     producer:

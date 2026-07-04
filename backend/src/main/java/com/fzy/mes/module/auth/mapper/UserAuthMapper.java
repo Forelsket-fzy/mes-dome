@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 @Mapper
 public interface UserAuthMapper extends BaseMapper<UserAuth> {
 
@@ -15,5 +17,5 @@ public interface UserAuthMapper extends BaseMapper<UserAuth> {
 
     @Select("select r.role_code from role r join user_role ur on r.id = ur.role_id" +
             " where ur.user_id = #{userId}")
-    String findRoleByUserID( Long userId);
+    List<String> findRoleByUserID(Long userId);
 }

@@ -6,6 +6,8 @@ import com.fzy.mes.module.auth.dto.LoginRequest;
 import com.fzy.mes.module.auth.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -26,9 +28,6 @@ public class AuthController {
         return Result.success(authService.login(req));
     }
 
-    /**
-     * 使用 refresh token 换新 access token（Header: Authorization: Bearer {refreshToken}）
-     */
     @PostMapping("/auth/refresh")
     public Result<Map<String, String>> refresh(@RequestHeader("Authorization") String authorization) {
         String refreshToken = JwtUtil.resolveBearerToken(authorization);
@@ -43,11 +42,6 @@ public class AuthController {
         return Result.success(tokens);
     }
 
-    /**
-     * 登出：吊销 refresh token。
-     * Header Authorization: Bearer {refreshToken}
-     * 可选 Header X-Access-Token: Bearer {accessToken}，将当前 access jti 入黑名单
-     */
     @PostMapping("/auth/logout")
     public Result<Void> logout(
             @RequestHeader("Authorization") String authorization,

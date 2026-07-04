@@ -1,10 +1,12 @@
 package com.fzy.mes.module.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fzy.mes.common.validation.Create;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class AuthSession {
@@ -13,6 +15,7 @@ public class AuthSession {
 
     private String username;
 
+    @JsonIgnore
     private String password;
 
     private String realName;
@@ -23,6 +26,6 @@ public class AuthSession {
 
     private Boolean enabled;
 
-    private String role;
+    private List<String> role;
 
 }

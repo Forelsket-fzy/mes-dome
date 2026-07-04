@@ -24,7 +24,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("operation_task")
-public class OperationTask extends OperationDto {
+public class
+OperationTask extends OperationDto {
 
 	@NotNull(groups = Update.class, message = "工序任务ID不能为空")
 	@TableId(type = IdType.AUTO)

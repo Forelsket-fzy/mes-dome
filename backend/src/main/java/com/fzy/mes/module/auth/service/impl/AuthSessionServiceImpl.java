@@ -9,13 +9,18 @@ import com.fzy.mes.module.auth.service.AuthSessionService;
 import com.fzy.mes.module.cache.service.CacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 public class AuthSessionServiceImpl implements AuthSessionService {
+
+    @Value("mes:jwt:access-expire")
+    private long accessExpireMs;
 
     @Autowired
     private CacheService cacheService;
@@ -36,7 +41,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
             return null;
         }
 
-        String role = userAuthMapper.findRoleByUserID(authUser.getUserId());
+        List<String> role = userAuthMapper.findRoleByUserID(authUser.getUserId());
         AuthSession user = new AuthSession();
         user.setUsername(username);
         user.setPassword(authUser.getPassword());
@@ -48,7 +53,7 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         user.setSkillLevel(sysUser.getSkillLevel());
 
         try {
-            cacheService.setValueWithExpire("mes:user:" + username, user, 3, TimeUnit.HOURS);
+            cacheService.setValueWithExpire("mes:user:" + username, user, accessExpireMs, TimeUnit.MILLISECONDS);
         } catch (RuntimeException e) {
             log.error("写入 Redis 失败, username={}", username, e);
         }

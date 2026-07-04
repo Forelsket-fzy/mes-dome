@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public Result<String> handleException(Exception e) {
-        log.error("系统繁忙");
+        log.error("系统繁忙",e);
         return Result.error("系统繁忙");
     }
 
