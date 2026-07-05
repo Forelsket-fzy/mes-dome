@@ -1,5 +1,6 @@
 package com.fzy.mes.common.filter;
 
+import com.fzy.mes.common.utils.AuthorityUtils;
 import com.fzy.mes.common.utils.JwtAccessClaims;
 import com.fzy.mes.common.utils.JwtUtil;
 import com.fzy.mes.common.utils.ResultResponseWriter;
@@ -13,13 +14,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,10 +74,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String role = authSession.getRole();
-        List<GrantedAuthority> authorityList = (role == null || role.isBlank())
-                ? Collections.emptyList()
-                : List.of(new SimpleGrantedAuthority(role));
+        List<GrantedAuthority> authorityList = AuthorityUtils.toAuthorities(authSession.getRole());
 
         UserDetails userDetails = new LoginUser(
                 authSession.getId(),

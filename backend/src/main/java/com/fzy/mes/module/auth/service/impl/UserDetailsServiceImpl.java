@@ -1,19 +1,16 @@
 package com.fzy.mes.module.auth.service.impl;
 
+import com.fzy.mes.common.utils.AuthorityUtils;
 import com.fzy.mes.module.auth.dto.AuthSession;
 import com.fzy.mes.module.auth.service.AuthSessionService;
 import com.fzy.mes.module.auth.vo.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
@@ -27,11 +24,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
 
-        List<String> role = user.getRole();
-        List<GrantedAuthority> authorityList = (role == null || role.isEmpty())
-                ? Collections.emptyList()
-                : role.stream().map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        List<GrantedAuthority> authorityList = AuthorityUtils.toAuthorities(user.getRole());
 
         return new LoginUser(user.getId(), username, user.getPassword(), user.getEnabled(), authorityList);
     }

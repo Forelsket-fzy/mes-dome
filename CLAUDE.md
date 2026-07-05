@@ -32,7 +32,7 @@ ERP Mock 推单 → 工单状态机 → 主动派工 → 扫码报工（MQ 异�
 | 消息队列 | RocketMQ | 5.5 原生 `rocketmq-client`（无 Spring Boot Starter） |
 | 鉴权 | Spring Security + Auth0 JWT | `java-jwt` 4.4.0 |
 | AOP | spring-boot-starter-**aspectj** | SB4 已改名，**没有** `spring-boot-starter-aop` |
-| 前端（计划） | Vue 3 + Element Plus + Vite | 尚未初始化 |
+| 前端 | Vue 3 + Element Plus + Vite | **D7 ✅** `frontend/`，5173 端口 |
 | 部署 | Docker Compose | MySQL + Redis（RocketMQ 待补） |
 
 ### Spring Boot 4 踩坑备忘
@@ -58,12 +58,13 @@ ERP Mock 推单 → 工单状态机 → 主动派工 → 扫码报工（MQ 异�
 | JWT 登录 | ✅ |
 | Mock ERP 推单 | 🟡 D6 |
 | 工单查询 | 🟡 D8 分页 + 详情 |
+| 工单状态机 | ✅ D9 `WorkOrderStateMachine` + 7 条单测 |
 | CORS | 🟡 基础已有，origin 待收紧 |
 | Redis | ✅ |
 | RocketMQ | ⏸ 仅 yml 占位；Java 配置 **D22 再加** |
-| Vue 前端 | ❌ D7 |
+| Vue 前端 | ✅ D7 登录 + 双端壳 |
 
-**当前开发阶段**：D5/D6/D8 代码完成；Filter 已统一 Result；下一步 Apifox → D7 前端 → D9 状态机。
+**当前开发阶段**：D5/D6/D8/D9/D7 代码完成；下一步 Apifox 自测 → 登录联调 → D10 关单。
 
 ---
 
@@ -84,7 +85,16 @@ MES-dome/
 │       └── resources/
 │           ├── application.yml
 │           └── sql/mes_db.sql
-└── frontend/                   # 计划：Vue 单项目（尚未创建）
+└── frontend/                   # Vue 3 + Element Plus + Vite（D7 ✅）
+    ├── vite.config.ts          # 5173；/api 代理 → localhost:8081
+    └── src/
+        ├── api/                # request 拦截器、auth API
+        ├── stores/auth.ts      # Pinia + localStorage 持久化
+        ├── router/             # /admin/*、/terminal/*、JWT 守卫
+        ├── layouts/            # AdminLayout、TerminalLayout
+        └── views/login/        # 登录页
+
+design-system/mes-dome/         # ui-ux-pro-max 设计规范（MASTER.md）
 ```
 
 ### 计划中的后端包结构
@@ -342,9 +352,10 @@ cd backend && mvn spring-boot:run
 ## 14. 下一步（开发者手写导向）
 
 1. **D6/D8 Apifox 自测**（推单幂等 + 工单分页/详情）
-2. **D7** Vue 壳子 + 登录页
-3. **D9** 工单状态机（手写）
+2. **前后端登录联调**（`cd frontend && npm run dev`，`admin/123456` → `/admin`）
+3. **D10** ERP 关单 + 状态映射
 4. **D22 前再加 RocketMQ Java 配置**（当前仅 yml 占位，避免未连 MQ 启动失败）
-5. 余量见 [优化计划.md](./优化计划.md)：RBAC、CORS origin、`mes:user:` TTL
+5. **D12** 工单列表 + 详情页（AI 生成 UI）
+6. 余量见 [优化计划.md](./优化计划.md)：RBAC、CORS origin、`mes:user:` TTL
 
 每完成一个模块，用「帮我 Review + 面试怎么讲」的方式验收，而不是让 AI 生成下一块代码。

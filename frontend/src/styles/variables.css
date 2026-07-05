@@ -1,0 +1,24 @@
+:root {
+  --color-primary: #64748b;
+  --color-secondary: #94a3b8;
+  --color-cta: #f97316;
+  --color-background: #f8fafc;
+  --color-text: #334155;
+  --color-text-muted: #475569;
+  --color-border: #e2e8f0;
+  --color-surface: #ffffff;
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --transition-fast: 180ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
