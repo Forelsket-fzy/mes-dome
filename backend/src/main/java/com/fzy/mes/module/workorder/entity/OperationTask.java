@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
 import com.fzy.mes.common.validation.Create;
 import com.fzy.mes.common.validation.Update;
-import com.fzy.mes.module.erp.dto.OperationDto;
+import com.fzy.mes.module.erp.dto.OperationRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @TableName("operation_task")
 public class
-OperationTask extends OperationDto {
+OperationTask extends OperationRequest {
 
 	@NotNull(groups = Update.class, message = "工序任务ID不能为空")
 	@TableId(type = IdType.AUTO)

@@ -30,7 +30,7 @@ public class ErpPushWorkOrderRequest {
 
     @NotEmpty(message = "工序列表不能为空")
     @Valid
-    private List<OperationDto> operations;
+    private List<OperationRequest> operations;
 
     private LocalDateTime dueDate;
 

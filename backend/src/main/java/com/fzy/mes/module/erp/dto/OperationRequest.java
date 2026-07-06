@@ -9,7 +9,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class OperationDto {
+public class OperationRequest {
 
     @NotBlank(message = "工序编码不能为空")
     @Size(max = 30, message = "工序编码长度不能超过30")
