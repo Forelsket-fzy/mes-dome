@@ -6,14 +6,11 @@ import com.fzy.mes.module.erp.dto.ErpPushWorkOrderResponse;
 import com.fzy.mes.module.erp.dto.ErpPushWorkOrderRequest;
 import com.fzy.mes.module.erp.service.ErpWorkOrderService;
 import com.fzy.mes.module.erp.vo.ErpCloseWorkOrderResponse;
+import com.fzy.mes.module.workorder.statemachine.WorkOrderStatus;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api")
