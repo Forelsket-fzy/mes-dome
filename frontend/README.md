@@ -39,6 +39,6 @@ src/
 
 | 天 | 页面 |
 |----|------|
-| D12 | `/admin/work-orders` 工单列表 + 详情 |
-| D13 | `/admin/dashboard` ECharts 看板 |
+| D12 | `/admin/work-orders` 工单列表 + 详情 | **✅** |
+| D13 | `/admin/dashboard` ECharts 看板 | **✅** |
 | D19 | `/terminal/report` 扫码报工 |

@@ -14,13 +14,36 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => {
+  if (route.path.startsWith('/admin/work-orders')) {
+    return '/admin/work-orders'
+  }
+  return route.path
+})
 
 const menuItems = [
   { path: '/admin', label: '首页概览', icon: DataBoard },
-  { path: '/admin/work-orders', label: '工单管理', icon: Document, disabled: true },
-  { path: '/admin/dashboard', label: '生产看板', icon: Monitor, disabled: true },
+  { path: '/admin/work-orders', label: '工单管理', icon: Document },
+  { path: '/admin/dashboard', label: '生产看板', icon: Monitor },
 ]
+
+const pageTitle = computed(() => {
+  const title = route.meta.title as string | undefined
+  return title ?? '管理端工作台'
+})
+
+const pageSubtitle = computed(() => {
+  if (route.path.startsWith('/admin/work-orders/') && route.params.id) {
+    return `工单 ID：${route.params.id}`
+  }
+  if (route.path === '/admin/work-orders') {
+    return '分页查询、筛选与详情联调（D12）'
+  }
+  if (route.path === '/admin/dashboard') {
+    return '工单 7 态统计 · ECharts · Redis 60s 缓存（D13）'
+  }
+  return '工单、派工、看板将在此区域逐步接入'
+})
 
 async function handleLogout() {
   await authStore.logout()
@@ -44,11 +67,9 @@ async function handleLogout() {
           v-for="item in menuItems"
           :key="item.path"
           :index="item.path"
-          :disabled="item.disabled"
         >
           <el-icon><component :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
-          <el-tag v-if="item.disabled" size="small" type="info" class="soon-tag">D12</el-tag>
         </el-menu-item>
       </el-menu>
     </el-aside>
@@ -56,8 +77,8 @@ async function handleLogout() {
     <el-container>
       <el-header class="topbar">
         <div>
-          <h2>管理端工作台</h2>
-          <p class="muted-text">工单、派工、看板将在此区域逐步接入</p>
+          <h2>{{ pageTitle }}</h2>
+          <p class="muted-text">{{ pageSubtitle }}</p>
         </div>
 
         <div class="topbar-actions">

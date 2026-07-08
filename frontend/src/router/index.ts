@@ -31,6 +31,24 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminHomeView.vue'),
           meta: { title: '管理端首页' },
         },
+        {
+          path: 'work-orders',
+          name: 'admin-work-orders',
+          component: () => import('@/views/admin/work-order/WorkOrderListView.vue'),
+          meta: { title: '工单管理' },
+        },
+        {
+          path: 'work-orders/:id',
+          name: 'admin-work-order-detail',
+          component: () => import('@/views/admin/work-order/WorkOrderDetailView.vue'),
+          meta: { title: '工单详情' },
+        },
+        {
+          path: 'dashboard',
+          name: 'admin-dashboard',
+          component: () => import('@/views/admin/dashboard/DashboardView.vue'),
+          meta: { title: '生产看板' },
+        },
       ],
     },
     {

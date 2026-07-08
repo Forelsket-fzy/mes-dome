@@ -31,9 +31,9 @@ import { Connection, Document, Timer } from '@element-plus/icons-vue'
     </div>
 
     <article class="welcome-card page-card">
-      <h3>D7 前端壳子已搭建</h3>
+      <h3>D12/D13 管理端页面已接入</h3>
       <p class="muted-text">
-        当前页面为管理端占位首页。D12 将接入工单列表与详情，D13 将接入 ECharts 看板。
+        工单列表、详情与 ECharts 看板已对接 D8/D11 API。
       </p>
       <el-alert
         title="联调提示"
