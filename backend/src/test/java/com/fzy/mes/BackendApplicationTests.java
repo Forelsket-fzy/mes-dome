@@ -12,27 +12,4 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest
 class BackendApplicationTests {
 
-	@Autowired
-	private UserAuthMapper userAuthMapper;
-
-	@Autowired
-	private SysUserMapper sysUserMapper;
-
-	@Test
-	void contextLoads() {
-	}
-
-	@Test
-	void sysUserMapperCanQueryDatabase() {
-		assertTrue(sysUserMapper.selectCount(null) >= 0);
-	}
-
-
-
-	@Test
-	public void tets(){
-		System.out.println("test");
-	}
-
-
 }

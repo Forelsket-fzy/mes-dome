@@ -6,6 +6,7 @@ import com.fzy.mes.module.auth.entity.SysUser;
 import com.fzy.mes.module.auth.entity.UserAuth;
 import com.fzy.mes.module.auth.mapper.UserAuthMapper;
 import com.fzy.mes.module.auth.service.AuthSessionService;
+import com.fzy.mes.module.cache.RedisCacheKeys;
 import com.fzy.mes.module.cache.service.CacheService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class AuthSessionServiceImpl implements AuthSessionService {
 
-    @Value("mes:jwt:access-expire")
+    @Value("${mes.jwt.access-expire}")
     private long accessExpireMs;
 
     @Autowired
@@ -53,7 +54,8 @@ public class AuthSessionServiceImpl implements AuthSessionService {
         user.setSkillLevel(sysUser.getSkillLevel());
 
         try {
-            cacheService.setValueWithExpire("mes:user:" + username, user, accessExpireMs, TimeUnit.MILLISECONDS);
+            cacheService.setValueWithExpire(
+                    RedisCacheKeys.userSession(username), user, accessExpireMs, TimeUnit.MILLISECONDS);
         } catch (RuntimeException e) {
             log.error("写入 Redis 失败, username={}", username, e);
         }
@@ -63,18 +65,10 @@ public class AuthSessionServiceImpl implements AuthSessionService {
 
     @Override
     public AuthSession getByUsername(String username) {
-        Object cached = cacheService.getValue("mes:user:" + username);
-        AuthSession user = null;
-        if (cached instanceof AuthSession authSession) {
-            user = authSession;
-        } else if (cached != null) {
-            log.warn("Redis 会话类型不匹配, username={}, 回源查库", username);
-        }
-
+        AuthSession user = cacheService.getValue(RedisCacheKeys.userSession(username), AuthSession.class);
         if (user == null) {
             user = loadFromDb(username);
         }
-
         return user;
     }
 

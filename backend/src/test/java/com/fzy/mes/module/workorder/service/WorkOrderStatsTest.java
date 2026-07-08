@@ -1,11 +1,12 @@
 package com.fzy.mes.module.workorder.service;
 
+import com.fzy.mes.module.cache.RedisCacheKeys;
+import com.fzy.mes.module.cache.service.CacheService;
 import com.fzy.mes.module.workorder.service.impl.WorkOrderServiceImpl;
 import com.fzy.mes.module.workorder.vo.WorkOrderStatusStatsItemsVO;
-import com.fzy.mes.module.workorder.vo.WorkOrderStatusVO;
-import com.fzy.mes.module.cache.service.CacheService;
 import com.fzy.mes.module.workorder.mapper.OperationTaskMapper;
 import com.fzy.mes.module.workorder.mapper.WorkOrderMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,8 +21,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,10 +41,15 @@ class WorkOrderStatsTest {
     @InjectMocks
     private WorkOrderServiceImpl workOrderService;
 
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(workOrderService, "workOrderStatsTtlSeconds", 60L);
+        when(cacheService.getValue(RedisCacheKeys.WORK_ORDER_STATUS_STATS, WorkOrderStatusStatsItemsVO.class))
+                .thenReturn(null);
+    }
+
     @Test
     void getStatsShouldReturnAllSevenStatuses() {
-        ReflectionTestUtils.setField(workOrderService, "statsTtlSeconds", 60L);
-        when(cacheService.getValue("mes:stats:wo:status")).thenReturn(null);
         when(workOrderMapper.countGroupByStatus()).thenReturn(List.of(
                 row(0, 3),
                 row(2, 2)
@@ -55,25 +63,29 @@ class WorkOrderStatsTest {
         assertEquals(3, findCount(stats, 0));
         assertEquals(2, findCount(stats, 2));
         assertEquals("已下发", findLabel(stats, 0));
-        verify(cacheService).setValueWithExpire(eq("mes:stats:wo:status"), eq(stats), eq(60L), eq(TimeUnit.SECONDS));
+        verify(cacheService).setValueWithExpire(
+                eq(RedisCacheKeys.WORK_ORDER_STATUS_STATS),
+                eq(stats),
+                eq(60L),
+                eq(TimeUnit.SECONDS));
     }
 
     @Test
     void getStatsShouldHitCacheOnSecondCall() {
         WorkOrderStatusStatsItemsVO cached = new WorkOrderStatusStatsItemsVO();
         cached.setTotal(10);
-        when(cacheService.getValue("mes:stats:wo:status")).thenReturn(cached);
+        when(cacheService.getValue(RedisCacheKeys.WORK_ORDER_STATUS_STATS, WorkOrderStatusStatsItemsVO.class))
+                .thenReturn(cached);
 
         WorkOrderStatusStatsItemsVO stats = workOrderService.getStats();
 
         assertSame(cached, stats);
-        verify(workOrderMapper, times(0)).countGroupByStatus();
+        verify(workOrderMapper, never()).countGroupByStatus();
+        verify(cacheService, never()).setValueWithExpire(any(), any(), anyLong(), any());
     }
 
     @Test
     void getStatsTotalShouldEqualSumOfCounts() {
-        ReflectionTestUtils.setField(workOrderService, "statsTtlSeconds", 60L);
-        when(cacheService.getValue("mes:stats:wo:status")).thenReturn(null);
         when(workOrderMapper.countGroupByStatus()).thenReturn(List.of(
                 row(0, 1),
                 row(1, 2),
@@ -82,7 +94,7 @@ class WorkOrderStatsTest {
 
         WorkOrderStatusStatsItemsVO stats = workOrderService.getStats();
 
-        long sum = stats.getItems().stream().mapToLong(WorkOrderStatusVO::getCount).sum();
+        long sum = stats.getItems().stream().mapToLong(item -> item.getCount()).sum();
         assertEquals(sum, stats.getTotal());
         assertEquals(6, stats.getTotal());
     }

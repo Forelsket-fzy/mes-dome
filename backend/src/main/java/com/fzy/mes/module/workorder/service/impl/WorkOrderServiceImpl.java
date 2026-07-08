@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fzy.mes.common.exception.BusinessException;
+import com.fzy.mes.module.cache.RedisCacheKeys;
 import com.fzy.mes.module.cache.service.CacheService;
 import com.fzy.mes.module.workorder.dto.WorkOrderQuery;
 import com.fzy.mes.module.workorder.entity.OperationTask;
@@ -31,17 +32,15 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class WorkOrderServiceImpl implements WorkOrderService {
 
-    private static final String STATS_CACHE_KEY = "mes:stats:wo:status";
-
-    @Value("${mes.redis.cache.work-order-stats-ttl-seconds:60}")
-    private long statsTtlSeconds;
-
     @Autowired
     private WorkOrderMapper workOrderMapper;
     @Autowired
     private OperationTaskMapper operationTaskMapper;
     @Autowired
     private CacheService cacheService;
+
+    @Value("${mes.redis.cache.work-order-stats-ttl-seconds:60}")
+    private long workOrderStatsTtlSeconds;
 
     @Override
     public Page<WorkOrderListItemVO> pageList(WorkOrderQuery query) {
@@ -79,13 +78,20 @@ public class WorkOrderServiceImpl implements WorkOrderService {
 
     @Override
     public WorkOrderStatusStatsItemsVO getStats() {
-        Object cached = cacheService.getValue(STATS_CACHE_KEY);
-        if (cached instanceof WorkOrderStatusStatsItemsVO stats) {
-            return stats;
+        WorkOrderStatusStatsItemsVO cached = cacheService.getValue(
+                RedisCacheKeys.WORK_ORDER_STATUS_STATS, WorkOrderStatusStatsItemsVO.class);
+        if (cached != null) {
+            return cached;
         }
 
         WorkOrderStatusStatsItemsVO stats = buildStatsFromDb();
-        cacheService.setValueWithExpire(STATS_CACHE_KEY, stats, statsTtlSeconds, TimeUnit.SECONDS);
+        if (workOrderStatsTtlSeconds > 0) {
+            cacheService.setValueWithExpire(
+                    RedisCacheKeys.WORK_ORDER_STATUS_STATS,
+                    stats,
+                    workOrderStatsTtlSeconds,
+                    TimeUnit.SECONDS);
+        }
         return stats;
     }
 
