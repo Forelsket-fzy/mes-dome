@@ -42,6 +42,9 @@ const pageSubtitle = computed(() => {
   if (route.path === '/admin/dashboard') {
     return '工单 7 态统计 · ECharts · Redis 60s 缓存（D13）'
   }
+  if (route.path === '/admin') {
+    return '推单 → 查询 → 看板 → 关单 全流程 Demo（D14）'
+  }
   return '工单、派工、看板将在此区域逐步接入'
 })
 

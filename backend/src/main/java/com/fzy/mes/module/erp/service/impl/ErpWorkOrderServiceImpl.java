@@ -3,6 +3,8 @@ package com.fzy.mes.module.erp.service.impl;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.fzy.mes.common.exception.BusinessException;
+import com.fzy.mes.module.cache.RedisCacheKeys;
+import com.fzy.mes.module.cache.service.CacheService;
 import com.fzy.mes.module.erp.dto.ErpCloseWorkOrderRequest;
 import com.fzy.mes.module.erp.dto.ErpPushWorkOrderRequest;
 import com.fzy.mes.module.erp.dto.ErpPushWorkOrderResponse;
@@ -38,6 +40,8 @@ public class ErpWorkOrderServiceImpl implements ErpWorkOrderService {
     private OperationTaskMapper operationTaskMapper;
     @Autowired
     private ErpOrderIdempotentStore idempotentStore;
+    @Autowired
+    private CacheService cacheService;
 
     @Override
     @Transactional
@@ -64,6 +68,7 @@ public class ErpWorkOrderServiceImpl implements ErpWorkOrderService {
             }
 
             idempotentStore.bindWorkOrderId(req.getErpOrderNo(), wo.getId());
+            invalidateStatsCache();
             return new ErpPushWorkOrderResponse(wo.getId(), false);
         } catch (DuplicateKeyException e) {
             existing = findByErpOrderNo(req.getErpOrderNo());
@@ -148,6 +153,7 @@ public class ErpWorkOrderServiceImpl implements ErpWorkOrderService {
             throw new BusinessException("并发更新失败");
         }
 
+        invalidateStatsCache();
         return new ErpCloseWorkOrderResponse(
                 existing.getId(), current.getCode(), next.getCode(), false, false);
     }
@@ -187,6 +193,10 @@ public class ErpWorkOrderServiceImpl implements ErpWorkOrderService {
         workOrder.setCompletedQty(0);
         workOrder.setDueDate(req.getDueDate());
         return workOrder;
+    }
+
+    private void invalidateStatsCache() {
+        cacheService.deleteKey(RedisCacheKeys.WORK_ORDER_STATUS_STATS);
     }
 
 }
