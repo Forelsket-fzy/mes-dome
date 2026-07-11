@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fzy.mes.module.dispatch.mapper.DispatchWorkerMapper">
+
+    <select id="selectWorkerPage"
+            resultType="com.fzy.mes.module.dispatch.vo.WorkerListItemVO">
+        SELECT DISTINCT u.id,
+               ua.username AS username,
+               u.real_name AS realName,
+               u.phone,
+               u.email,
+               u.skill_level AS skillLevel
+        FROM sys_user u
+        INNER JOIN user_auth ua ON u.id = ua.user_id AND ua.enabled = 1
+        INNER JOIN user_role ur ON u.id = ur.user_id
+        INNER JOIN role r ON ur.role_id = r.id AND r.role_code = 'ROLE_WORKER'
+        <where>
+            <if test="skillLevel != null">
+                AND u.skill_level = #{skillLevel}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (u.real_name LIKE CONCAT('%', #{keyword}, '%')
+                  OR u.phone LIKE CONCAT('%', #{keyword}, '%')
+                  OR ua.username LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY u.skill_level DESC, u.id ASC
+    </select>
+
+</mapper>
