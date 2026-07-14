@@ -3,9 +3,11 @@ package com.fzy.mes.module.dispatch.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fzy.mes.common.module.vo.Result;
 import com.fzy.mes.module.auth.vo.LoginUser;
+import com.fzy.mes.module.dispatch.dto.AuditQuery;
 import com.fzy.mes.module.dispatch.dto.DispatchRequest;
 import com.fzy.mes.module.dispatch.dto.WorkerQuery;
 import com.fzy.mes.module.dispatch.service.DispatchService;
+import com.fzy.mes.module.dispatch.vo.AuditResponse;
 import com.fzy.mes.module.dispatch.vo.DispatchResponse;
 import com.fzy.mes.module.dispatch.vo.WorkerListItemVO;
 import jakarta.validation.Valid;
@@ -36,6 +38,12 @@ public class DispatchController {
     public Result<DispatchResponse> dispatch(@Valid @RequestBody DispatchRequest request,
                                              @AuthenticationPrincipal LoginUser user) {
         return Result.success(dispatchService.dispatch(request, user.getId()));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_PLANNER')")
+    @GetMapping("/dispatch/audit")
+    public Result<Page<AuditResponse>> pageAudits(@Valid AuditQuery query) {
+        return Result.success(dispatchService.pageAudits(query));
     }
 
 }

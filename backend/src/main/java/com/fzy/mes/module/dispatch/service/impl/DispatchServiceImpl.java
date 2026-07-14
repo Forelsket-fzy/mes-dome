@@ -5,12 +5,17 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fzy.mes.common.exception.BusinessException;
 import com.fzy.mes.module.cache.RedisCacheKeys;
 import com.fzy.mes.module.cache.service.CacheService;
+import com.fzy.mes.module.dispatch.dto.AuditQuery;
 import com.fzy.mes.module.dispatch.dto.DispatchRequest;
+import com.fzy.mes.module.dispatch.dto.SnapshotDTO;
 import com.fzy.mes.module.dispatch.dto.WorkerQuery;
+import com.fzy.mes.module.dispatch.entity.DispatchAuditLog;
 import com.fzy.mes.module.dispatch.entity.DispatchRecord;
+import com.fzy.mes.module.dispatch.mapper.DispatchAuditLogMapper;
 import com.fzy.mes.module.dispatch.mapper.DispatchRecordMapper;
 import com.fzy.mes.module.dispatch.mapper.DispatchWorkerMapper;
 import com.fzy.mes.module.dispatch.service.DispatchService;
+import com.fzy.mes.module.dispatch.vo.AuditResponse;
 import com.fzy.mes.module.dispatch.vo.DispatchResponse;
 import com.fzy.mes.module.dispatch.vo.WorkerListItemVO;
 import com.fzy.mes.module.workorder.entity.OperationTask;
@@ -24,6 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ObjectMapper;
+
+import java.time.LocalDateTime;
 
 @Service
 public class DispatchServiceImpl implements DispatchService {
@@ -44,6 +52,10 @@ public class DispatchServiceImpl implements DispatchService {
     private DispatchRecordMapper dispatchRecordMapper;
     @Autowired
     private CacheService cacheService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
+    private DispatchAuditLogMapper dispatchAuditLogMapper;
 
     @Override
     public Page<WorkerListItemVO> pageWorkers(WorkerQuery query) {
@@ -59,6 +71,7 @@ public class DispatchServiceImpl implements DispatchService {
             throw new BusinessException("被派工人不存在或非工人角色");
         }
 
+        SnapshotDTO snapshotDTO = new SnapshotDTO();
         OperationTask task = operationTaskMapper.selectById(request.getTaskId());
         if (task == null) {
             throw new BusinessException("工序任务不存在");
@@ -73,6 +86,12 @@ public class DispatchServiceImpl implements DispatchService {
             throw new BusinessException("工序任务状态不支持派工");
         }
 
+        snapshotDTO.setTaskId(task.getId());
+        snapshotDTO.setWorkOrderId(task.getWorkOrderId());
+        snapshotDTO.setOperationCode(task.getOperationCode());
+        snapshotDTO.setAssignedToBefore(task.getAssignedTo());
+
+
         WorkOrder workOrder = workOrderMapper.selectById(task.getWorkOrderId());
         if (workOrder == null) {
             throw new BusinessException("工单不存在");
@@ -85,6 +104,9 @@ public class DispatchServiceImpl implements DispatchService {
         if (currentStatus != WorkOrderStatus.ISSUED && currentStatus != WorkOrderStatus.ASSIGNED) {
             throw new BusinessException("工单当前状态不支持派工");
         }
+
+        snapshotDTO.setWorkOrderStatusBefore(currentStatus.getCode());
+        snapshotDTO.setErpOrderNo(workOrder.getErpOrderNo());
 
         int nextWorkOrderStatus = workOrder.getStatus();
         if (currentStatus == WorkOrderStatus.ISSUED) {
@@ -117,12 +139,29 @@ public class DispatchServiceImpl implements DispatchService {
         record.setMode(DISPATCH_MODE_MANUAL);
         dispatchRecordMapper.insert(record);
 
+        snapshotDTO.setMode(DISPATCH_MODE_MANUAL);
+        snapshotDTO.setAssigneeIdAfter(request.getAssigneeId());
+        String json = objectMapper.writeValueAsString(snapshotDTO);
+        DispatchAuditLog dispatchAuditLog = new DispatchAuditLog();
+        dispatchAuditLog.setDispatchId(record.getId());
+        dispatchAuditLog.setSnapshotJson(json);
+        dispatchAuditLog.setActionBy(operatorId);
+        dispatchAuditLog.setCreatedAt(LocalDateTime.now());
+        dispatchAuditLogMapper.insert(dispatchAuditLog);
+
         DispatchResponse response = new DispatchResponse();
         response.setDispatchId(record.getId());
         response.setTaskId(task.getId());
         response.setWorkOrderId(task.getWorkOrderId());
         response.setWorkOrderStatus(nextWorkOrderStatus);
         return response;
+    }
+
+    @Override
+    public Page<AuditResponse> pageAudits(AuditQuery query) {
+        Page<AuditResponse> page = new Page<>(query.getPageNum(), query.getPageSize());
+        return dispatchAuditLogMapper.selectAuditPage(
+                page, query.getTaskId(), query.getAssigneeId(), query.getOperatorId());
     }
 
 }

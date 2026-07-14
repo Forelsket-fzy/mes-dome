@@ -3,7 +3,9 @@ package com.fzy.mes.module.dispatch.service;
 import com.fzy.mes.common.exception.BusinessException;
 import com.fzy.mes.module.cache.service.CacheService;
 import com.fzy.mes.module.dispatch.dto.DispatchRequest;
+import com.fzy.mes.module.dispatch.entity.DispatchAuditLog;
 import com.fzy.mes.module.dispatch.entity.DispatchRecord;
+import com.fzy.mes.module.dispatch.mapper.DispatchAuditLogMapper;
 import com.fzy.mes.module.dispatch.mapper.DispatchRecordMapper;
 import com.fzy.mes.module.dispatch.mapper.DispatchWorkerMapper;
 import com.fzy.mes.module.dispatch.service.impl.DispatchServiceImpl;
@@ -17,9 +19,11 @@ import com.fzy.mes.module.workorder.statemachine.WorkOrderStateMachine;
 import com.fzy.mes.module.workorder.statemachine.WorkOrderStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,6 +48,10 @@ class DispatchServiceTest {
     private DispatchRecordMapper dispatchRecordMapper;
     @Mock
     private CacheService cacheService;
+    @Mock
+    private ObjectMapper objectMapper;
+    @Mock
+    private DispatchAuditLogMapper dispatchAuditLogMapper;
 
     @InjectMocks
     private DispatchServiceImpl dispatchService;
@@ -65,6 +73,7 @@ class DispatchServiceTest {
             record.setId(100L);
             return 1;
         });
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
         DispatchRequest request = new DispatchRequest();
         request.setTaskId(1L);
@@ -76,6 +85,11 @@ class DispatchServiceTest {
         assertEquals(1, response.getWorkOrderStatus());
         verify(workOrderStateMachine).transit(WorkOrderStatus.ISSUED, WorkOrderEvent.DISPATCH);
         verify(cacheService).deleteKey(com.fzy.mes.module.cache.RedisCacheKeys.WORK_ORDER_STATUS_STATS);
+
+        ArgumentCaptor<DispatchAuditLog> auditCaptor = ArgumentCaptor.forClass(DispatchAuditLog.class);
+        verify(dispatchAuditLogMapper).insert(auditCaptor.capture());
+        assertEquals(100L, auditCaptor.getValue().getDispatchId());
+        assertEquals(2L, auditCaptor.getValue().getActionBy());
     }
 
     @Test
@@ -92,6 +106,7 @@ class DispatchServiceTest {
             record.setId(101L);
             return 1;
         });
+        when(objectMapper.writeValueAsString(any())).thenReturn("{}");
 
         DispatchRequest request = new DispatchRequest();
         request.setTaskId(2L);
@@ -103,6 +118,7 @@ class DispatchServiceTest {
         verify(workOrderStateMachine, never()).transit(any(), any());
         verify(workOrderMapper, never()).update(isNull(), any());
         verify(cacheService, never()).deleteKey(any());
+        verify(dispatchAuditLogMapper).insert(any(DispatchAuditLog.class));
     }
 
     @Test
@@ -118,6 +134,7 @@ class DispatchServiceTest {
 
         assertThrows(BusinessException.class, () -> dispatchService.dispatch(request, 2L));
         verify(dispatchRecordMapper, never()).insert(any(DispatchRecord.class));
+        verify(dispatchAuditLogMapper, never()).insert(any(DispatchAuditLog.class));
     }
 
     private OperationTask buildTask(Long id, Long workOrderId, int version, Long assignedTo, int status) {
@@ -135,6 +152,7 @@ class DispatchServiceTest {
         workOrder.setId(id);
         workOrder.setStatus(status);
         workOrder.setVersion(version);
+        workOrder.setErpOrderNo("ERP-" + id);
         return workOrder;
     }
 

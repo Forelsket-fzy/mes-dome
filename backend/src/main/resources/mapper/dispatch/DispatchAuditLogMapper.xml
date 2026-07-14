@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fzy.mes.module.dispatch.mapper.DispatchAuditLogMapper">
+
+    <select id="selectAuditPage"
+            resultType="com.fzy.mes.module.dispatch.vo.AuditResponse">
+        SELECT a.id AS auditId,
+               a.dispatch_id AS dispatchId,
+               a.action_by AS operatorId,
+               op.real_name AS operatorName,
+               dr.task_id AS taskId,
+               dr.assignee_id AS assigneeId,
+               asg.real_name AS assigneeName,
+               dr.mode AS mode,
+               t.work_order_id AS workOrderId,
+               t.operation_code AS operationCode,
+               t.operation_name AS operationName,
+               wo.erp_order_no AS erpOrderNo,
+               a.snapshot_json AS snapshotJson,
+               a.created_at AS createdAt
+        FROM dispatch_audit_log a
+        INNER JOIN dispatch_record dr ON a.dispatch_id = dr.id
+        INNER JOIN operation_task t ON dr.task_id = t.id
+        INNER JOIN work_order wo ON t.work_order_id = wo.id
+        LEFT JOIN sys_user op ON a.action_by = op.id
+        LEFT JOIN sys_user asg ON dr.assignee_id = asg.id
+        <where>
+            <if test="taskId != null">
+                AND dr.task_id = #{taskId}
+            </if>
+            <if test="assigneeId != null">
+                AND dr.assignee_id = #{assigneeId}
+            </if>
+            <if test="operatorId != null">
+                AND a.action_by = #{operatorId}
+            </if>
+        </where>
+        ORDER BY a.created_at DESC, a.id DESC
+    </select>
+
+</mapper>
