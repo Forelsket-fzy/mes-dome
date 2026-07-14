@@ -12,4 +12,6 @@ public interface DispatchWorkerMapper {
                                             @Param("skillLevel") Integer skillLevel,
                                             @Param("keyword") String keyword);
 
+    boolean existsActiveWorker(@Param("userId") Long userId);
+
 }

@@ -28,4 +28,13 @@
         ORDER BY u.skill_level DESC, u.id ASC
     </select>
 
+    <select id="existsActiveWorker" resultType="boolean">
+        SELECT COUNT(1) > 0
+        FROM sys_user u
+        INNER JOIN user_auth ua ON u.id = ua.user_id AND ua.enabled = 1
+        INNER JOIN user_role ur ON u.id = ur.user_id
+        INNER JOIN role r ON ur.role_id = r.id AND r.role_code = 'ROLE_WORKER'
+        WHERE u.id = #{userId}
+    </select>
+
 </mapper>
