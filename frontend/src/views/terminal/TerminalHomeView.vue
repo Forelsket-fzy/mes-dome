@@ -1,28 +1,35 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { List, Pointer } from '@element-plus/icons-vue'
+
+const router = useRouter()
+
+function goTasks() {
+  router.push('/terminal/tasks')
+}
 </script>
 
 <template>
   <section class="terminal-home">
     <article class="hero-card page-card">
-      <p class="eyebrow">D7 · 工人端壳子</p>
-      <h2>今日任务清单</h2>
+      <p class="eyebrow">工人端</p>
+      <h2>今日任务台</h2>
       <p class="muted-text">
-        工人端采用大按钮、高对比布局，便于车间触控操作。D19 将接入扫码报工与 X-Request-Id 幂等提交。
+        查看计划员派给您的工序任务；报工能力将在 D22 接入 Redis 幂等与 RocketMQ。
       </p>
     </article>
 
     <div class="action-grid">
-      <button type="button" class="action-card page-card cursor-pointer" disabled>
+      <button type="button" class="action-card page-card cursor-pointer" @click="goTasks">
         <el-icon><List /></el-icon>
-        <span>查看任务</span>
-        <small class="muted-text">D19 开放</small>
+        <span>查看我的任务</span>
+        <small class="muted-text">GET /api/tasks/my</small>
       </button>
 
       <button type="button" class="action-card page-card cursor-pointer" disabled>
         <el-icon><Pointer /></el-icon>
         <span>扫码报工</span>
-        <small class="muted-text">D19 开放</small>
+        <small class="muted-text">D22 开放</small>
       </button>
     </div>
   </section>
@@ -62,12 +69,17 @@ import { List, Pointer } from '@element-plus/icons-vue'
   gap: 8px;
   text-align: left;
   font: inherit;
-  transition: border-color var(--transition-fast), opacity var(--transition-fast);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .action-card .el-icon {
   font-size: 28px;
   color: var(--color-cta);
+}
+
+.action-card:not(:disabled):hover {
+  border-color: var(--color-cta);
+  transform: translateY(-2px);
 }
 
 .action-card:disabled {

@@ -49,6 +49,12 @@ const router = createRouter({
           component: () => import('@/views/admin/dashboard/DashboardView.vue'),
           meta: { title: '生产看板' },
         },
+        {
+          path: 'dispatch',
+          name: 'admin-dispatch',
+          component: () => import('@/views/admin/dispatch/DispatchView.vue'),
+          meta: { title: '派工管理' },
+        },
       ],
     },
     {
@@ -61,6 +67,12 @@ const router = createRouter({
           name: 'terminal-home',
           component: () => import('@/views/terminal/TerminalHomeView.vue'),
           meta: { title: '工人端首页' },
+        },
+        {
+          path: 'tasks',
+          name: 'terminal-tasks',
+          component: () => import('@/views/terminal/MyTasksView.vue'),
+          meta: { title: '我的任务' },
         },
       ],
     },

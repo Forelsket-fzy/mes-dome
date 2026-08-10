@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fzy.mes.module.workorder.mapper.OperationTaskMapper">
+
+    <select id="selectMyTasks"
+            resultType="com.fzy.mes.module.dispatch.vo.MyTaskItemVO">
+        SELECT ot.id              AS taskId,
+               ot.work_order_id   AS workOrderId,
+               wo.erp_order_no    AS erpOrderNo,
+               wo.product_code    AS productCode,
+               wo.product_name    AS productName,
+               ot.operation_code  AS operationCode,
+               ot.operation_name  AS operationName,
+               ot.seq,
+               ot.plan_qty        AS planQty,
+               ot.completed_qty   AS completedQty,
+               ot.status          AS taskStatus,
+               wo.status          AS workOrderStatus,
+               ot.priority,
+               ot.planned_start   AS plannedStart
+        FROM operation_task ot
+        INNER JOIN work_order wo ON wo.id = ot.work_order_id
+        WHERE ot.assigned_to = #{workerId}
+          AND ot.status &lt;&gt; 2
+          AND wo.status NOT IN (5, 6)
+        ORDER BY ot.priority DESC,
+                 ot.planned_start ASC,
+                 ot.id ASC
+    </select>
+
+</mapper>

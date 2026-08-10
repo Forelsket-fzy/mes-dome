@@ -1,4 +1,47 @@
+version: '3.8'
+
 services:
+  # ========== RocketMQ 相关服务 ==========
+  namesrv:
+    image: apache/rocketmq:5.5.0
+    container_name: rocketmq-namesrv
+    ports:
+      - "9876:9876"
+    environment:
+      JAVA_OPT_EXT: "-server -Xms256m -Xmx256m -Xmn128m"
+    command: sh mqnamesrv
+    networks:
+      - rocketmq-net
+
+  broker:
+    image: apache/rocketmq:5.5.0
+    container_name: rocketmq-broker
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+    environment:
+      NAMESRV_ADDR: "namesrv:9876"
+      JAVA_OPT_EXT: "-server -Xms256m -Xmx256m -Xmn128m"
+      BROKER_IP1: "124.223.171.40"   # 请替换为你的公网IP
+    command: sh mqbroker
+    depends_on:
+      - namesrv
+    networks:
+      - rocketmq-net
+
+  dashboard:
+    image: apacherocketmq/rocketmq-dashboard:2.1.0
+    container_name: rocketmq-dashboard
+    ports:
+      - "8082:8082"
+    environment:
+      NAMESRV_ADDR: "namesrv:9876"
+    depends_on:
+      - namesrv
+    networks:
+      - rocketmq-net
+
+  # ========== MySQL 服务 ==========
   mysql:
     image: mysql:8.0
     container_name: mes-mysql
@@ -18,7 +61,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - rocketmq-net
 
+  # ========== Redis 服务 ==========
   redis:
     image: redis:7-alpine
     container_name: mes-redis
@@ -30,6 +76,28 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+    networks:
+      - rocketmq-net
 
+  # ========== 新增 Modbus 模拟器服务 ==========
+  modbus-sim:
+    image: allexd2010/modbus-server-sim:2.2.0   # 轻量级 Modbus TCP 模拟器
+    container_name: modbus-simulator
+    restart: unless-stopped
+    ports:
+      - "502:502"   # 将容器内的 502 端口映射到宿主机 502，MES 通过公网IP:502 访问
+    environment:
+      # 可选的初始数据配置（示例：设置保持寄存器的初始值，格式为 地址:值,地址:值...）
+      # 若不需要，可以删除此环境变量
+      - INIT_HR_VALUES=0:100,1:200,2:50,3:300
+    networks:
+      - rocketmq-net
+
+# ========== 持久化卷 ==========
 volumes:
-  mes-mysql-data:
+  mes-mysql-data:   # MySQL 数据卷
+
+# ========== 网络 ==========
+networks:
+  rocketmq-net:
+    driver: bridge

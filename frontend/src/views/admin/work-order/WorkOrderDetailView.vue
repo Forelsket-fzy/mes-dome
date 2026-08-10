@@ -55,6 +55,9 @@ onMounted(loadDetail)
         <el-icon><Refresh /></el-icon>
         刷新
       </el-button>
+      <el-button type="primary" class="cursor-pointer" @click="router.push('/admin/dispatch')">
+        去派工
+      </el-button>
     </div>
 
     <template v-if="detail">

@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { List, SwitchButton, UserFilled } from '@element-plus/icons-vue'
+import { HomeFilled, List, SwitchButton, UserFilled } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => {
+  if (route.path.startsWith('/terminal/tasks')) {
+    return '/terminal/tasks'
+  }
+  return route.path
+})
 
 const menuItems = [
-  { path: '/terminal', label: '今日任务', icon: List },
-  { path: '/terminal/report', label: '扫码报工', icon: List, disabled: true },
+  { path: '/terminal', label: '首页', icon: HomeFilled },
+  { path: '/terminal/tasks', label: '我的任务', icon: List },
 ]
 
 async function handleLogout() {
@@ -51,11 +56,9 @@ async function handleLogout() {
             v-for="item in menuItems"
             :key="item.path"
             :index="item.path"
-            :disabled="item.disabled"
           >
             <el-icon><component :is="item.icon" /></el-icon>
             <span>{{ item.label }}</span>
-            <el-tag v-if="item.disabled" size="small" type="info" class="soon-tag">D19</el-tag>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -120,10 +123,6 @@ async function handleLogout() {
 
 .terminal-menu {
   border-right: none;
-}
-
-.soon-tag {
-  margin-left: auto;
 }
 
 .terminal-main {

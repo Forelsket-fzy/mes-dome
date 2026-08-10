@@ -23,11 +23,13 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    //登录
     @PostMapping("/auth/login")
     public Result<Map<String, String>> login(@RequestBody @Valid LoginRequest req) {
         return Result.success(authService.login(req));
     }
 
+    //注册
     @PostMapping("/auth/refresh")
     public Result<Map<String, String>> refresh(@RequestHeader("Authorization") String authorization) {
         String refreshToken = JwtUtil.resolveBearerToken(authorization);
@@ -42,6 +44,7 @@ public class AuthController {
         return Result.success(tokens);
     }
 
+    //登出
     @PostMapping("/auth/logout")
     public Result<Void> logout(
             @RequestHeader("Authorization") String authorization,

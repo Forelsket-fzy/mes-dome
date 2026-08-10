@@ -19,25 +19,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class WorkOrderController {
 
-    @Autowired
-    private WorkOrderService workOrderService;
+	@Autowired
+	private WorkOrderService workOrderService;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_PLANNER')")
-    @GetMapping("/work-orders")
-    public Result<Page<WorkOrderListItemVO>> page(@Valid WorkOrderQuery query) {
-        return Result.success(workOrderService.pageList(query));
-    }
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_PLANNER')")
+	@GetMapping("/work-orders")
+	public Result<Page<WorkOrderListItemVO>> page(@Valid WorkOrderQuery query) {
+		return Result.success(workOrderService.pageList(query));
+	}
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_PLANNER')")
-    @GetMapping("/work-orders/stats")
-    public Result<WorkOrderStatusStatsItemsVO> stats() {
-        return Result.success(workOrderService.getStats());
-    }
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_PLANNER')")
+	@GetMapping("/work-orders/stats")
+	public Result<WorkOrderStatusStatsItemsVO> stats() {
+		return Result.success(workOrderService.getStats());
+	}
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_PLANNER')")
-    @GetMapping("/work-orders/{id}")
-    public Result<WorkOrderDetailVO> detail(@PathVariable Long id) {
-        return Result.success(workOrderService.getDetail(id));
-    }
+	@PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_PLANNER')")
+	@GetMapping("/work-orders/{id}")
+	public Result<WorkOrderDetailVO> detail(@PathVariable Long id) {
+		return Result.success(workOrderService.getDetail(id));
+	}
 
 }

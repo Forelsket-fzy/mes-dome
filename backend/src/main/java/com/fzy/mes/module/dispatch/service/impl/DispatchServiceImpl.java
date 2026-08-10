@@ -17,6 +17,7 @@ import com.fzy.mes.module.dispatch.mapper.DispatchWorkerMapper;
 import com.fzy.mes.module.dispatch.service.DispatchService;
 import com.fzy.mes.module.dispatch.vo.AuditResponse;
 import com.fzy.mes.module.dispatch.vo.DispatchResponse;
+import com.fzy.mes.module.dispatch.vo.MyTaskItemVO;
 import com.fzy.mes.module.dispatch.vo.WorkerListItemVO;
 import com.fzy.mes.module.workorder.entity.OperationTask;
 import com.fzy.mes.module.workorder.entity.WorkOrder;
@@ -32,6 +33,8 @@ import org.springframework.util.StringUtils;
 import tools.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class DispatchServiceImpl implements DispatchService {
@@ -162,6 +165,15 @@ public class DispatchServiceImpl implements DispatchService {
         Page<AuditResponse> page = new Page<>(query.getPageNum(), query.getPageSize());
         return dispatchAuditLogMapper.selectAuditPage(
                 page, query.getTaskId(), query.getAssigneeId(), query.getOperatorId());
+    }
+
+    @Override
+    public List<MyTaskItemVO> listMyTasks(Long workerId) {
+        if (workerId == null) {
+            return Collections.emptyList();
+        }
+        List<MyTaskItemVO> tasks = operationTaskMapper.selectMyTasks(workerId);
+        return tasks == null ? Collections.emptyList() : tasks;
     }
 
 }
