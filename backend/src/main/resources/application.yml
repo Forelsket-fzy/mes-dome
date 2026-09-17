@@ -84,16 +84,19 @@ mes:
     access-expire: 900000   # 15分钟
     refresh-expire: 604800000  # 7天
 
-  # RocketMQ：仅预留 Topic/Group 命名，D22 报工前不写 Java 配置类（未连 NameServer 时避免启动失败）
+  # RocketMQ：对齐 docker-compose namesrv:9876 / apache/rocketmq:5.5.0
+  # 本地未起 MQ 时设 enabled: false，避免启动失败
   rocketmq:
-    name-server: 124.223.171.40:9876
+    enabled: true
+    name-server: ${MES_ROCKETMQ_NAME_SERVER:124.223.171.40:9876}
     producer:
       group: mes-producer-group
-      send-message-timeout: 3000
+      send-message-timeout: 10000
       retry-times-when-send-failed: 2
       max-message-size: 4194304
     consumer:
-      group: mes-consumer-group
+      report-group: mes-report-consumer-group
+      erp-callback-group: mes-erp-callback-consumer-group
       consume-thread-min: 5
       consume-thread-max: 20
     topic:
@@ -112,6 +115,9 @@ mes:
       task-report-ttl-seconds: 30
     cache:
       work-order-stats-ttl-seconds: 60
+
+  integration:
+    retry-interval-ms: 300000
 
 ---
 spring:

@@ -22,8 +22,10 @@ services:
     environment:
       NAMESRV_ADDR: "namesrv:9876"
       JAVA_OPT_EXT: "-server -Xms256m -Xmx256m -Xmn128m"
-      BROKER_IP1: "124.223.171.40"   # 请替换为你的公网IP
-    command: sh mqbroker
+    volumes:
+      # 官方镜像不保证读环境变量 BROKER_IP1，用 conf 写死公网 IP
+      - ./docker/rocketmq/broker.conf:/home/rocketmq/rocketmq-5.5.0/conf/broker.conf:ro
+    command: sh mqbroker -n namesrv:9876 -c /home/rocketmq/rocketmq-5.5.0/conf/broker.conf
     depends_on:
       - namesrv
     networks:
@@ -76,6 +78,35 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+    networks:
+      - rocketmq-net
+
+  # ========== MES 后端（可选：本地开发可不用，直接 mvn spring-boot:run）==========
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mes-backend
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mes_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Fzy20041126
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      MES_ROCKETMQ_NAME_SERVER: namesrv:9876
+      MES_ROCKETMQ_ENABLED: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      namesrv:
+        condition: service_started
+      broker:
+        condition: service_started
     networks:
       - rocketmq-net
 

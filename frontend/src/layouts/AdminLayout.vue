@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
+  Connection,
   DataBoard,
   Document,
   Monitor,
@@ -22,6 +23,9 @@ const activeMenu = computed(() => {
   if (route.path.startsWith('/admin/dispatch')) {
     return '/admin/dispatch'
   }
+  if (route.path.startsWith('/admin/integration')) {
+    return '/admin/integration'
+  }
   return route.path
 })
 
@@ -29,6 +33,7 @@ const menuItems = [
   { path: '/admin', label: '首页概览', icon: DataBoard },
   { path: '/admin/work-orders', label: '工单管理', icon: Document },
   { path: '/admin/dispatch', label: '派工管理', icon: User },
+  { path: '/admin/integration', label: '集成对账', icon: Connection },
   { path: '/admin/dashboard', label: '生产看板', icon: Monitor },
 ]
 
@@ -50,8 +55,11 @@ const pageSubtitle = computed(() => {
   if (route.path === '/admin/dispatch') {
     return '主动派工 · 工人选择 · 审计可查（D16~D19）'
   }
+  if (route.path === '/admin/integration') {
+    return 'IntegrationLog 对账 · 失败重试（D29~D31）'
+  }
   if (route.path === '/admin') {
-    return '推单 → 派工 → 工人见任务 主链路 Demo（D21）'
+    return '推单 → 派工 → 报工 → 回传 ERP 主链路 Demo'
   }
   return '工单、派工、看板将在此区域逐步接入'
 })

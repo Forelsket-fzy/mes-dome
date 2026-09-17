@@ -9,7 +9,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 const activeMenu = computed(() => {
-  if (route.path.startsWith('/terminal/tasks')) {
+  if (route.path.startsWith('/terminal/tasks') || route.path.startsWith('/terminal/report')) {
     return '/terminal/tasks'
   }
   return route.path

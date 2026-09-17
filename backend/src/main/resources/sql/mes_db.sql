@@ -317,10 +317,34 @@ INSERT INTO `defect_reason` (`code`, `name`, `defect_type`, `operation_code`) VA
 -- 演示工单（已下发，含两道工序）
 INSERT INTO `work_order` (`id`, `erp_order_no`, `erp_status`, `product_code`, `product_name`, `plan_qty`, `completed_qty`, `status`, `due_date`, `created_by`) VALUES
 (1, 'ERP-2026-0001', 'RELEASED', 'P-10086', '电机外壳', 100, 0, 0, DATE_ADD(NOW(), INTERVAL 7 DAY), 2),
-(2, 'ERP-2026-0002', 'RELEASED', 'P-10087', '控制面板',  50, 0, 0, DATE_ADD(NOW(), INTERVAL 3 DAY), 2);
+(2, 'ERP-2026-0002', 'RELEASED', 'P-10087', '控制面板',  50, 0, 0, DATE_ADD(NOW(), INTERVAL 3 DAY), 2),
+(3, 'ERP-2026-0003', 'RELEASED', 'P-10088', '轴承座',    80, 0, 0, DATE_ADD(NOW(), INTERVAL 5 DAY), 2),
+(4, 'ERP-2026-0004', 'RELEASED', 'P-10089', '齿轮箱',    40, 0, 0, DATE_ADD(NOW(), INTERVAL 6 DAY), 2),
+(5, 'ERP-2026-0005', 'RELEASED', 'P-10090', '散热片',   120, 0, 0, DATE_ADD(NOW(), INTERVAL 4 DAY), 2),
+(6, 'ERP-2026-0006', 'RELEASED', 'P-10091', '接线端子',  60, 0, 0, DATE_ADD(NOW(), INTERVAL 8 DAY), 2),
+(7, 'ERP-2026-0007', 'RELEASED', 'P-10092', '密封圈',   200, 0, 0, DATE_ADD(NOW(), INTERVAL 2 DAY), 2),
+(8, 'ERP-2026-0008', 'RELEASED', 'P-10093', '端盖',      90, 0, 0, DATE_ADD(NOW(), INTERVAL 9 DAY), 2),
+(9, 'ERP-2026-0009', 'RELEASED', 'P-10094', '传感器支架', 30, 0, 0, DATE_ADD(NOW(), INTERVAL 10 DAY), 2),
+(10,'ERP-2026-0010', 'RELEASED', 'P-10095', '防护罩',    70, 0, 0, DATE_ADD(NOW(), INTERVAL 11 DAY), 2);
 
 INSERT INTO `operation_task` (`work_order_id`, `operation_code`, `operation_name`, `seq`, `plan_qty`, `completed_qty`, `status`, `priority`, `planned_start`) VALUES
 (1, 'OP010', '冲压', 1, 100, 0, 0, 10, DATE_ADD(NOW(), INTERVAL 1 DAY)),
 (1, 'OP020', '焊接', 2, 100, 0, 0,  5, DATE_ADD(NOW(), INTERVAL 2 DAY)),
 (2, 'OP010', '贴片', 1,  50, 0, 0, 20, NOW()),
-(2, 'OP030', '测试', 2,  50, 0, 0, 15, DATE_ADD(NOW(), INTERVAL 1 DAY));
+(2, 'OP030', '测试', 2,  50, 0, 0, 15, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(3, 'OP010', '车削', 1,  80, 0, 0, 12, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(3, 'OP020', '钻孔', 2,  80, 0, 0,  8, DATE_ADD(NOW(), INTERVAL 2 DAY)),
+(4, 'OP010', '铸造', 1,  40, 0, 0, 18, NOW()),
+(4, 'OP040', '装配', 2,  40, 0, 0, 14, DATE_ADD(NOW(), INTERVAL 2 DAY)),
+(5, 'OP010', '冲压', 1, 120, 0, 0,  9, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(5, 'OP030', '表面处理', 2, 120, 0, 0, 6, DATE_ADD(NOW(), INTERVAL 3 DAY)),
+(6, 'OP010', '注塑', 1,  60, 0, 0, 11, NOW()),
+(6, 'OP020', '检验', 2,  60, 0, 0,  7, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(7, 'OP010', '裁切', 1, 200, 0, 0, 16, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(7, 'OP030', '成型', 2, 200, 0, 0, 13, DATE_ADD(NOW(), INTERVAL 2 DAY)),
+(8, 'OP010', '机加', 1,  90, 0, 0, 10, NOW()),
+(8, 'OP040', '喷涂', 2,  90, 0, 0,  5, DATE_ADD(NOW(), INTERVAL 2 DAY)),
+(9, 'OP010', '钣金', 1,  30, 0, 0, 17, DATE_ADD(NOW(), INTERVAL 1 DAY)),
+(9, 'OP020', '焊接', 2,  30, 0, 0, 12, DATE_ADD(NOW(), INTERVAL 2 DAY)),
+(10,'OP010', '冲压', 1,  70, 0, 0, 15, NOW()),
+(10,'OP030', '装配', 2,  70, 0, 0,  9, DATE_ADD(NOW(), INTERVAL 1 DAY));

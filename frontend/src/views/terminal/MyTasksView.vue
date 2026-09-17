@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Refresh, Warning } from '@element-plus/icons-vue'
 import { fetchMyTasks } from '@/api/dispatch'
@@ -11,6 +12,7 @@ import {
   getWorkOrderStatusMeta,
 } from '@/constants/workOrderStatus'
 
+const router = useRouter()
 const loading = ref(false)
 const tasks = ref<MyTaskItem[]>([])
 
@@ -33,6 +35,10 @@ async function loadTasks() {
 
 function remainingQty(task: MyTaskItem) {
   return Math.max(0, (task.planQty ?? 0) - (task.completedQty ?? 0))
+}
+
+function goReport(task: MyTaskItem) {
+  router.push(`/terminal/report/${task.taskId}`)
 }
 
 onMounted(loadTasks)
@@ -111,9 +117,14 @@ onMounted(loadTasks)
           </div>
         </dl>
 
-        <el-button class="report-btn cursor-pointer" size="large" disabled>
+        <el-button
+          class="report-btn cursor-pointer"
+          type="primary"
+          size="large"
+          :disabled="remainingQty(task) <= 0"
+          @click="goReport(task)"
+        >
           扫码报工
-          <el-tag size="small" type="info" class="soon-tag">D22</el-tag>
         </el-button>
       </article>
 

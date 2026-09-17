@@ -27,7 +27,7 @@ request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 request.interceptors.response.use(
   (response) => {
     const payload = response.data as ApiResult<unknown>
-    if (payload && typeof payload.code === 'number' && payload.code !== 200) {
+    if (payload && typeof payload.code === 'number' && payload.code !== 200 && payload.code !== 202) {
       return Promise.reject(new Error(payload.message || '请求失败'))
     }
     return response
